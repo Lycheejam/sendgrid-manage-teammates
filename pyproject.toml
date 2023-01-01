@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "sendgrid-manage-teammates"
+version = "0.1.0"
+description = ""
+authors = ["Lycheejam <lycheejamwow@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+sendgrid = "^6.9.7"
+
+[tool.poetry.dev-dependencies]
+black = "^22.12.0"
+flake8 = "5.0.4"
+pre-commit = "^2.21.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
