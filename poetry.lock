@@ -190,6 +190,17 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
+name = "python-dotenv"
+version = "0.21.0"
+description = "Read key-value pairs from a .env file and set them as environment variables"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.extras]
+cli = ["click (>=5.0)"]
+
+[[package]]
 name = "python-http-client"
 version = "3.3.7"
 description = "HTTP REST client, simplified for Python"
@@ -282,7 +293,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "flake8 (<5)", "pytest-co
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "44627e0d0cf477da82ae4ec7290328b4263cb2c61dda67b34f9624512f54918d"
+content-hash = "47f5af33b414395eada2a939a9a45d971ab12d16598a8afbf41bc0332cb0d27a"
 
 [metadata.files]
 black = [
@@ -362,6 +373,10 @@ pycodestyle = [
 pyflakes = [
     {file = "pyflakes-2.5.0-py2.py3-none-any.whl", hash = "sha256:4579f67d887f804e67edb544428f264b7b24f435b263c4614f384135cea553d2"},
     {file = "pyflakes-2.5.0.tar.gz", hash = "sha256:491feb020dca48ccc562a8c0cbe8df07ee13078df59813b83959cbdada312ea3"},
+]
+python-dotenv = [
+    {file = "python-dotenv-0.21.0.tar.gz", hash = "sha256:b77d08274639e3d34145dfa6c7008e66df0f04b7be7a75fd0d5292c191d79045"},
+    {file = "python_dotenv-0.21.0-py3-none-any.whl", hash = "sha256:1684eb44636dd462b66c3ee016599815514527ad99965de77f43e0944634a7e5"},
 ]
 python-http-client = [
     {file = "python_http_client-3.3.7-py3-none-any.whl", hash = "sha256:ad371d2bbedc6ea15c26179c6222a78bc9308d272435ddf1d5c84f068f249a36"},

@@ -7,6 +7,7 @@ authors = ["Lycheejam <lycheejamwow@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.7"
 sendgrid = "^6.9.7"
+python-dotenv = "^0.21.0"
 
 [tool.poetry.dev-dependencies]
 black = "^22.12.0"
