@@ -4,6 +4,8 @@ from sendgrid import SendGridAPIClient
 from dotenv import load_dotenv
 import json
 from helpers.teammate import Teammate
+import pprint  # noqa: F821
+import datetime
 
 load_dotenv()
 
@@ -37,14 +39,15 @@ class SendgridTeammatesManage:
             )
             results.append(t.to_dict())
 
+        results_sorted = sorted(results, key=lambda x: x["email"])
+
+        file_name = datetime.datetime.now().strftime("%Y%m%dT%H%M%S") + "_hoge.json"
+
         file_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "../data", "hoge.json"
+            os.path.dirname(os.path.abspath(__file__)), "../data", file_name
         )
         with open(file_path, "w") as f:
-            json.dump(results, f, indent=4)
-
-        # self.get_scopes()
-        # self.add_teammate()
+            json.dump(results_sorted, f, indent=4)
 
     def authorize_client(self) -> SendGridAPIClient:
         return SendGridAPIClient(api_key=os.environ.get("SENDGRID_API_KEY"))
