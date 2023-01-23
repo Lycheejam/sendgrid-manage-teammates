@@ -2,20 +2,11 @@ import os
 import traceback
 from sendgrid import SendGridAPIClient
 from dotenv import load_dotenv
-import pprint
 import json
+from helpers.teammate import Teammate
 
 load_dotenv()
 
-class Teammate:
-    def __init__(self, email, is_admin, pending_token=None, username=None):
-        self.email = email
-        self.username = username or email.split("@")[0]
-        self.pending_token = pending_token
-        self.is_admin = is_admin
-
-    def to_dict(self):
-        return self.__dict__
 
 class SendgridTeammatesManage:
     def __init__(self) -> None:
@@ -30,14 +21,14 @@ class SendgridTeammatesManage:
             t = Teammate(
                 email=current_teammate["email"],
                 username=current_teammate["username"],
-                username=current_teammate["is_admin"]
+                is_admin=current_teammate["is_admin"],
             )
             results.append(t.to_dict())
         for pending_teammate in pending_teammates:
             t = Teammate(
                 email=pending_teammate["email"],
                 pending_token=pending_teammate["token"],
-                username=current_teammate["is_admin"]
+                is_admin=current_teammate["is_admin"],
             )
             results.append(t.to_dict())
 
