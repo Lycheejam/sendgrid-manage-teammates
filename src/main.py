@@ -13,17 +13,22 @@ class SendgridTeammatesManage:
         self.sg = self.authorize_client()
 
     def main(self) -> None:
-        current_teammates = self.get_teammates()
-        pending_teammates = self.get_teammates_pending()
-
         results = []
+
+        current_teammates = self.get_teammates()
         for current_teammate in current_teammates:
+            scopes_sorted = sorted(
+                self.get_teammate_scopes(current_teammate["username"])
+            )
             t = Teammate(
                 email=current_teammate["email"],
                 username=current_teammate["username"],
                 is_admin=current_teammate["is_admin"],
+                scopes=scopes_sorted,
             )
             results.append(t.to_dict())
+
+        pending_teammates = self.get_teammates_pending()
         for pending_teammate in pending_teammates:
             t = Teammate(
                 email=pending_teammate["email"],
@@ -60,12 +65,10 @@ class SendgridTeammatesManage:
 
         return response
 
-    def get_scopes(self):
-        response = self.sg.client.scopes.get()
+    def get_teammate_scopes(self, username):
+        response = self.sg.client.teammates._(username).get().to_dict["scopes"]
 
-        print(response.status_code)
-        print(response.body)
-        print(response.headers)
+        pprint.pprint(response)
 
         return response
 
