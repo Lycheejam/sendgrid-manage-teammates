@@ -8,10 +8,14 @@ import json
 load_dotenv()
 
 class Teammate:
-    def __init__(self, email, pending_token=None, username=None):
+    def __init__(self, email, is_admin, pending_token=None, username=None):
         self.email = email
         self.username = username or email.split("@")[0]
         self.pending_token = pending_token
+        self.is_admin = is_admin
+
+    def to_dict(self):
+        return self.__dict__
 
 class SendgridTeammatesManage:
     def __init__(self) -> None:
@@ -23,19 +27,25 @@ class SendgridTeammatesManage:
 
         results = []
         for current_teammate in current_teammates:
-            t = Teammate(email=current_teammate["email"], username=current_teammate["username"])
-            results.append(t)
+            t = Teammate(
+                email=current_teammate["email"],
+                username=current_teammate["username"],
+                username=current_teammate["is_admin"]
+            )
+            results.append(t.to_dict())
         for pending_teammate in pending_teammates:
-            t = Teammate(email=pending_teammate["email"], pending_token=pending_teammate["token"])
-            results.append(t)
+            t = Teammate(
+                email=pending_teammate["email"],
+                pending_token=pending_teammate["token"],
+                username=current_teammate["is_admin"]
+            )
+            results.append(t.to_dict())
 
-        hoge = {
-            "results": results
-        }
-
-        pprint.pprint(type(hoge))
-        pprint.pprint(hoge)
-        pprint.pprint(json.dumps(hoge))
+        file_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "../data", "hoge.json"
+        )
+        with open(file_path, "w") as f:
+            json.dump(results, f, indent=4)
 
         # self.get_scopes()
         # self.add_teammate()
