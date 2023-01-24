@@ -53,47 +53,50 @@ class SendgridTeammatesManage:
         return SendGridAPIClient(api_key=os.environ.get("SENDGRID_API_KEY"))
 
     def get_teammates(self):
-        response = self.sg.client.teammates.get().to_dict["result"]
-
-        # pprint.pprint(response)
-        # for res in response:
-        #     pprint.pprint(res["email"])
-
-        return response
-
-    def get_pending_teammates(self):
-        response = self.sg.client.teammates.pending.get().to_dict["result"]
-
-        # pprint.pprint(response)
-
-        return response
-
-    def get_teammate_scopes(self, username):
-        response = self.sg.client.teammates._(username).get().to_dict["scopes"]
-
-        pprint.pprint(response)
-
-        return response
-
-    def add_teammate(self):
-        email = "example@exemple.com"
-        scopes = ["user.profile.read", "user.profile.update"]
-        is_admin = False
-
-        data = {"email": email, "scopes": scopes, "is_admin": is_admin}
-
-        print(data)
-
         try:
-            response = self.sg.client.teammates.post(request_body=data)
+            response = self.sg.client.teammates.get().to_dict["result"]
 
-            print(response.status_code)
-            print(response.body)
-            print(response.headers)
+            # pprint.pprint(response)
 
             return response
+
         except Exception:
-            print(traceback.format_exc())
+            pprint.pprint(traceback.format_exc())
+
+    def get_pending_teammates(self):
+        try:
+            response = self.sg.client.teammates.pending.get().to_dict["result"]
+
+            pprint.pprint(response)
+
+            return response
+
+        except Exception:
+            pprint.pprint(traceback.format_exc())
+
+    def get_teammate_scopes(self, username):
+        try:
+            response = self.sg.client.teammates._(username).get().to_dict["scopes"]
+
+            # pprint.pprint(response)
+
+            return response
+
+        except Exception:
+            pprint.pprint(traceback.format_exc())
+
+    def delete_pending_teammate(self, token):
+        try:
+            response = self.sg.client.teammates.pending._(token).delete()
+
+            pprint.pprint(response.status_code)
+            pprint.pprint(response.body)
+            pprint.pprint(response.headers)
+
+            return response.status_code
+
+        except Exception:
+            pprint.pprint(traceback.format_exc())
 
 
 if __name__ == "__main__":
