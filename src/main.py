@@ -30,7 +30,7 @@ class SendgridTeammatesManage:
             )
             results.append(t.to_dict())
 
-        pending_teammates = self.get_teammates_pending()
+        pending_teammates = self.get_pending_teammates()
         for pending_teammate in pending_teammates:
             t = Teammate(
                 email=pending_teammate["email"],
@@ -61,7 +61,7 @@ class SendgridTeammatesManage:
 
         return response
 
-    def get_teammates_pending(self):
+    def get_pending_teammates(self):
         response = self.sg.client.teammates.pending.get().to_dict["result"]
 
         # pprint.pprint(response)
