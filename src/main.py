@@ -149,7 +149,7 @@ class SendgridTeammatesManage:
     def create_results_json(self, results, file_name):
         try:
             file_path = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), "../data", file_name
+                os.path.dirname(os.path.abspath(__file__)), "../logs", file_name
             )
             with open(file_path, "w") as f:
                 json.dump(results, f, indent=4)
