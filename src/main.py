@@ -3,7 +3,7 @@ import traceback
 from sendgrid import SendGridAPIClient
 from dotenv import load_dotenv
 import json
-from helpers.teammate import Teammate
+from models.teammate import Teammate
 import pprint  # noqa: F821
 import datetime
 
