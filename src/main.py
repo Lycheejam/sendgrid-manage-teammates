@@ -16,8 +16,9 @@ class SendgridTeammatesManage:
 
     def main(self) -> None:
         timestamp = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
-        results = []
 
+        # TODO: ここまとめて外に出したい
+        results = []
         current_teammates = self.get_teammates()
         for current_teammate in current_teammates:
             scopes_sorted = sorted(
@@ -45,6 +46,7 @@ class SendgridTeammatesManage:
         file_name = timestamp + "_before.json"
         self.create_results_json(results_sorted, file_name)
 
+        # TODO: users.jsonのstateを見るようにする
         for result in results_sorted:
             if result["pending_token"] is not None:
                 self.delete_pending_teammate(result["pending_token"])
@@ -57,6 +59,7 @@ class SendgridTeammatesManage:
             if ("email", user["email"]) not in results_sorted.items():
                 self.invite_teammate(user["email"], roles[user["roles"]])
 
+        # TODO: 同じくまとめて外に出したい
         results = []
         current_teammates = self.get_teammates()
         for current_teammate in current_teammates:
@@ -125,6 +128,7 @@ class SendgridTeammatesManage:
         try:
             response = self.sg.client.teammates.pending._(token).delete()
 
+            # TODO: loggerに変えたい
             pprint.pprint(response.status_code)
             pprint.pprint(response.body)
             pprint.pprint(response.headers)
