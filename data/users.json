@@ -1,0 +1,14 @@
+[
+    {
+        "email": "example@example.com",
+        "is_admin": "true",
+        "role": "Administrator",
+        "state": "present"
+    },
+    {
+        "email": "example+hoge@example.com",
+        "is_admin": "false",
+        "role": "DeveloperReadOnly",
+        "state": "present"
+    }
+]

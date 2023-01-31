@@ -49,9 +49,13 @@ class SendgridTeammatesManage:
             if result["pending_token"] is not None:
                 self.delete_pending_teammate(result["pending_token"])
 
-        email = "example@example.com"
-        scopes = ["user.profile.read", "user.profile.update"]
-        self.invite_teammate(email, scopes)
+        # TODO: list in dictのkey,value検索ってどうやるの...
+        users = self.read_json_to_dict("users.json")
+        roles = self.read_json_to_dict("roles.json")
+        for user in users:
+            # TODO: not work
+            if ("email", user["email"]) not in results_sorted.items():
+                self.invite_teammate(user["email"], roles[user["roles"]])
 
         results = []
         current_teammates = self.get_teammates()
@@ -153,6 +157,18 @@ class SendgridTeammatesManage:
             )
             with open(file_path, "w") as f:
                 json.dump(results, f, indent=4)
+
+        except Exception:
+            pprint.pprint(traceback.format_exc())
+
+    def read_json_to_dict(self, file_name):
+        try:
+            file_path = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), "../data", file_name
+            )
+            with open(file_path) as f:
+                data = json.load(f)
+                return data
 
         except Exception:
             pprint.pprint(traceback.format_exc())
