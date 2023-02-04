@@ -47,6 +47,7 @@ class SendgridTeammatesManage:
         self.create_results_json(results_sorted, file_name)
 
         # TODO: users.jsonのstateを見るようにする
+        # NOTE: 招待中ユーザを全て削除
         for result in results_sorted:
             if result["pending_token"] is not None:
                 self.delete_pending_teammate(result["pending_token"])
@@ -54,10 +55,12 @@ class SendgridTeammatesManage:
         # TODO: list in dictのkey,value検索ってどうやるの...
         users = self.read_json_to_dict("users.json")
         roles = self.read_json_to_dict("roles.json")
+        resulet_emails = [result["email"] for result in results_sorted]
         for user in users:
-            # TODO: not work
-            if ("email", user["email"]) not in results_sorted.items():
+            if user["email"] not in resulet_emails and user["state"] == "present":
                 self.invite_teammate(user["email"], roles[user["roles"]])
+            if user["email"] in resulet_emails and user["state"] == "absent":
+                pprint.pprint("somthing...")
 
         # TODO: 同じくまとめて外に出したい
         results = []
@@ -127,6 +130,21 @@ class SendgridTeammatesManage:
     def delete_pending_teammate(self, token):
         try:
             response = self.sg.client.teammates.pending._(token).delete()
+
+            # TODO: loggerに変えたい
+            pprint.pprint(response.status_code)
+            pprint.pprint(response.body)
+            pprint.pprint(response.headers)
+
+            return response.status_code
+
+        except Exception:
+            pprint.pprint(traceback.format_exc())
+
+    # TODO: emailとusername一致しないパターンってどうすればいいの...？
+    def delete_teammate(self, username):
+        try:
+            response = self.sg.client.teammates._(username).delete()
 
             # TODO: loggerに変えたい
             pprint.pprint(response.status_code)
