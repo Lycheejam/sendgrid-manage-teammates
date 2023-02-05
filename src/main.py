@@ -52,15 +52,20 @@ class SendgridTeammatesManage:
             if result["pending_token"] is not None:
                 self.delete_pending_teammate(result["pending_token"])
 
-        # TODO: list in dictのkey,value検索ってどうやるの...
         users = self.read_json_to_dict("users.json")
         roles = self.read_json_to_dict("roles.json")
+
+        # NOTE: ユーザ削除
+        for user in users:
+            for result in results_sorted:
+                if user["email"] == result["email"] and user["state"] == "absent":
+                    self.delete_teammate(result["username"])
+
+        # NOTE: ユーザ招待
         resulet_emails = [result["email"] for result in results_sorted]
         for user in users:
             if user["email"] not in resulet_emails and user["state"] == "present":
                 self.invite_teammate(user["email"], roles[user["roles"]])
-            if user["email"] in resulet_emails and user["state"] == "absent":
-                pprint.pprint("somthing...")
 
         # TODO: 同じくまとめて外に出したい
         results = []
@@ -141,7 +146,6 @@ class SendgridTeammatesManage:
         except Exception:
             pprint.pprint(traceback.format_exc())
 
-    # TODO: emailとusername一致しないパターンってどうすればいいの...？
     def delete_teammate(self, username):
         try:
             response = self.sg.client.teammates._(username).delete()
@@ -158,8 +162,6 @@ class SendgridTeammatesManage:
 
     def invite_teammate(self, email, scopes, is_admin=False):
         params = {"email": email, "scopes": scopes, "is_admin": is_admin}
-
-        print(params)
 
         try:
             response = self.sg.client.teammates.post(request_body=params)
