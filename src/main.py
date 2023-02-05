@@ -21,7 +21,6 @@ class SendgridTeammatesManage:
         file_name = timestamp + "_before.json"
         self.create_results_json(before_fetch_results, file_name)
 
-        # TODO: users.jsonのstateを見るようにする
         # NOTE: 招待中ユーザを全て削除
         for result in before_fetch_results:
             if result["pending_token"] is not None:
