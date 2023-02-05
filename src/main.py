@@ -17,38 +17,15 @@ class SendgridTeammatesManage:
     def main(self) -> None:
         timestamp = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
 
-        # TODO: ここまとめて外に出したい
-        results = []
-        current_teammates = self.get_teammates()
-        for current_teammate in current_teammates:
-            scopes_sorted = sorted(
-                self.get_teammate_scopes(current_teammate["username"])
-            )
-            t = Teammate(
-                email=current_teammate["email"],
-                username=current_teammate["username"],
-                is_admin=current_teammate["is_admin"],
-                scopes=scopes_sorted,
-            )
-            results.append(t.to_dict())
-
-        pending_teammates = self.get_pending_teammates()
-        for pending_teammate in pending_teammates:
-            t = Teammate(
-                email=pending_teammate["email"],
-                pending_token=pending_teammate["token"],
-                is_admin=current_teammate["is_admin"],
-            )
-            results.append(t.to_dict())
-
-        results_sorted = sorted(results, key=lambda x: x["email"])
+        before_fetch_results = self.fetch_teammates()
+        sorted_results = sorted(before_fetch_results, key=lambda x: x["email"])
 
         file_name = timestamp + "_before.json"
-        self.create_results_json(results_sorted, file_name)
+        self.create_results_json(sorted_results, file_name)
 
         # TODO: users.jsonのstateを見るようにする
         # NOTE: 招待中ユーザを全て削除
-        for result in results_sorted:
+        for result in sorted_results:
             if result["pending_token"] is not None:
                 self.delete_pending_teammate(result["pending_token"])
 
@@ -57,44 +34,21 @@ class SendgridTeammatesManage:
 
         # NOTE: ユーザ削除
         for user in users:
-            for result in results_sorted:
+            for result in sorted_results:
                 if user["email"] == result["email"] and user["state"] == "absent":
                     self.delete_teammate(result["username"])
 
         # NOTE: ユーザ招待
-        resulet_emails = [result["email"] for result in results_sorted]
+        resulet_emails = [result["email"] for result in sorted_results]
         for user in users:
             if user["email"] not in resulet_emails and user["state"] == "present":
                 self.invite_teammate(user["email"], roles[user["roles"]])
 
-        # TODO: 同じくまとめて外に出したい
-        results = []
-        current_teammates = self.get_teammates()
-        for current_teammate in current_teammates:
-            scopes_sorted = sorted(
-                self.get_teammate_scopes(current_teammate["username"])
-            )
-            t = Teammate(
-                email=current_teammate["email"],
-                username=current_teammate["username"],
-                is_admin=current_teammate["is_admin"],
-                scopes=scopes_sorted,
-            )
-            results.append(t.to_dict())
-
-        pending_teammates = self.get_pending_teammates()
-        for pending_teammate in pending_teammates:
-            t = Teammate(
-                email=pending_teammate["email"],
-                pending_token=pending_teammate["token"],
-                is_admin=current_teammate["is_admin"],
-            )
-            results.append(t.to_dict())
-
-        results_sorted = sorted(results, key=lambda x: x["email"])
+        after_fetch_results = self.fetch_teammates()
+        sorted_results = sorted(after_fetch_results, key=lambda x: x["email"])
 
         file_name = timestamp + "_after.json"
-        self.create_results_json(results_sorted, file_name)
+        self.create_results_json(sorted_results, file_name)
 
     def authorize_client(self) -> SendGridAPIClient:
         return SendGridAPIClient(api_key=os.environ.get("SENDGRID_API_KEY"))
@@ -196,6 +150,32 @@ class SendgridTeammatesManage:
 
         except Exception:
             pprint.pprint(traceback.format_exc())
+
+    def fetch_teammates(self):
+        results = []
+        current_teammates = self.get_teammates()
+        for current_teammate in current_teammates:
+            scopes_sorted = sorted(
+                self.get_teammate_scopes(current_teammate["username"])
+            )
+            t = Teammate(
+                email=current_teammate["email"],
+                username=current_teammate["username"],
+                is_admin=current_teammate["is_admin"],
+                scopes=scopes_sorted,
+            )
+            results.append(t.to_dict())
+
+        pending_teammates = self.get_pending_teammates()
+        for pending_teammate in pending_teammates:
+            t = Teammate(
+                email=pending_teammate["email"],
+                pending_token=pending_teammate["token"],
+                is_admin=current_teammate["is_admin"],
+            )
+            results.append(t.to_dict())
+
+        return results
 
 
 if __name__ == "__main__":
