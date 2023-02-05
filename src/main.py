@@ -16,17 +16,18 @@ class SendgridTeammatesManage:
 
     def main(self) -> None:
         timestamp = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
+        env = os.environ.get("env", "")
 
         before_fetch_results = self.fetch_teammates()
-        file_name = timestamp + "_before.json"
+        file_name = "_".join(filter(None, (timestamp, env, "before.json")))
         self.create_results_json(before_fetch_results, file_name)
 
         for result in before_fetch_results:
             if result["pending_token"] is not None:
                 self.delete_pending_teammate(result["pending_token"])
 
-        users = self.read_json_to_dict("users.json")
-        roles = self.read_json_to_dict("roles.json")
+        users = self.read_json_to_dict("/".join(filter(None, (env, "users.json"))))
+        roles = self.read_json_to_dict("/".join(filter(None, (env, "roles.json"))))
 
         for user in users:
             for result in before_fetch_results:
@@ -39,7 +40,7 @@ class SendgridTeammatesManage:
                 self.invite_teammate(user["email"], roles[user["roles"]])
 
         after_fetch_results = self.fetch_teammates()
-        file_name = timestamp + "_after.json"
+        file_name = "_".join(filter(None, (timestamp, env, "after.json")))
         self.create_results_json(after_fetch_results, file_name)
 
     def authorize_client(self) -> SendGridAPIClient:
