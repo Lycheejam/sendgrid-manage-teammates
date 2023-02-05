@@ -18,14 +18,12 @@ class SendgridTeammatesManage:
         timestamp = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
 
         before_fetch_results = self.fetch_teammates()
-        sorted_results = sorted(before_fetch_results, key=lambda x: x["email"])
-
         file_name = timestamp + "_before.json"
-        self.create_results_json(sorted_results, file_name)
+        self.create_results_json(before_fetch_results, file_name)
 
         # TODO: users.jsonのstateを見るようにする
         # NOTE: 招待中ユーザを全て削除
-        for result in sorted_results:
+        for result in before_fetch_results:
             if result["pending_token"] is not None:
                 self.delete_pending_teammate(result["pending_token"])
 
@@ -34,21 +32,19 @@ class SendgridTeammatesManage:
 
         # NOTE: ユーザ削除
         for user in users:
-            for result in sorted_results:
+            for result in before_fetch_results:
                 if user["email"] == result["email"] and user["state"] == "absent":
                     self.delete_teammate(result["username"])
 
         # NOTE: ユーザ招待
-        resulet_emails = [result["email"] for result in sorted_results]
+        resulet_emails = [result["email"] for result in before_fetch_results]
         for user in users:
             if user["email"] not in resulet_emails and user["state"] == "present":
                 self.invite_teammate(user["email"], roles[user["roles"]])
 
         after_fetch_results = self.fetch_teammates()
-        sorted_results = sorted(after_fetch_results, key=lambda x: x["email"])
-
         file_name = timestamp + "_after.json"
-        self.create_results_json(sorted_results, file_name)
+        self.create_results_json(after_fetch_results, file_name)
 
     def authorize_client(self) -> SendGridAPIClient:
         return SendGridAPIClient(api_key=os.environ.get("SENDGRID_API_KEY"))
@@ -152,7 +148,7 @@ class SendgridTeammatesManage:
             pprint.pprint(traceback.format_exc())
 
     def fetch_teammates(self):
-        results = []
+        current_teammate_results = []
         current_teammates = self.get_teammates()
         for current_teammate in current_teammates:
             scopes_sorted = sorted(
@@ -164,8 +160,12 @@ class SendgridTeammatesManage:
                 is_admin=current_teammate["is_admin"],
                 scopes=scopes_sorted,
             )
-            results.append(t.to_dict())
+            current_teammate_results.append(t.to_dict())
+        sorted_current_teammate_results = sorted(
+            current_teammate_results, key=lambda x: x["email"]
+        )
 
+        pending_teammate_results = []
         pending_teammates = self.get_pending_teammates()
         for pending_teammate in pending_teammates:
             t = Teammate(
@@ -173,9 +173,12 @@ class SendgridTeammatesManage:
                 pending_token=pending_teammate["token"],
                 is_admin=current_teammate["is_admin"],
             )
-            results.append(t.to_dict())
+            pending_teammate_results.append(t.to_dict())
+        sorted_pending_teammate_results = sorted(
+            pending_teammate_results, key=lambda x: x["email"]
+        )
 
-        return results
+        return sorted_current_teammate_results + sorted_pending_teammate_results
 
 
 if __name__ == "__main__":
