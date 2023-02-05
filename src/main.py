@@ -21,7 +21,6 @@ class SendgridTeammatesManage:
         file_name = timestamp + "_before.json"
         self.create_results_json(before_fetch_results, file_name)
 
-        # NOTE: 招待中ユーザを全て削除
         for result in before_fetch_results:
             if result["pending_token"] is not None:
                 self.delete_pending_teammate(result["pending_token"])
@@ -29,13 +28,11 @@ class SendgridTeammatesManage:
         users = self.read_json_to_dict("users.json")
         roles = self.read_json_to_dict("roles.json")
 
-        # NOTE: ユーザ削除
         for user in users:
             for result in before_fetch_results:
                 if user["email"] == result["email"] and user["state"] == "absent":
                     self.delete_teammate(result["username"])
 
-        # NOTE: ユーザ招待
         resulet_emails = [result["email"] for result in before_fetch_results]
         for user in users:
             if user["email"] not in resulet_emails and user["state"] == "present":
@@ -50,76 +47,38 @@ class SendgridTeammatesManage:
 
     def get_teammates(self):
         try:
-            response = self.sg.client.teammates.get().to_dict["result"]
-
-            # pprint.pprint(response)
-
-            return response
-
+            return self.sg.client.teammates.get().to_dict["result"]
         except Exception:
             pprint.pprint(traceback.format_exc())
 
     def get_pending_teammates(self):
         try:
-            response = self.sg.client.teammates.pending.get().to_dict["result"]
-
-            pprint.pprint(response)
-
-            return response
-
+            return self.sg.client.teammates.pending.get().to_dict["result"]
         except Exception:
             pprint.pprint(traceback.format_exc())
 
     def get_teammate_scopes(self, username):
         try:
-            response = self.sg.client.teammates._(username).get().to_dict["scopes"]
-
-            # pprint.pprint(response)
-
-            return response
-
+            return self.sg.client.teammates._(username).get().to_dict["scopes"]
         except Exception:
             pprint.pprint(traceback.format_exc())
 
     def delete_pending_teammate(self, token):
         try:
-            response = self.sg.client.teammates.pending._(token).delete()
-
-            # TODO: loggerに変えたい
-            pprint.pprint(response.status_code)
-            pprint.pprint(response.body)
-            pprint.pprint(response.headers)
-
-            return response.status_code
-
+            return self.sg.client.teammates.pending._(token).delete()
         except Exception:
             pprint.pprint(traceback.format_exc())
 
     def delete_teammate(self, username):
         try:
-            response = self.sg.client.teammates._(username).delete()
-
-            # TODO: loggerに変えたい
-            pprint.pprint(response.status_code)
-            pprint.pprint(response.body)
-            pprint.pprint(response.headers)
-
-            return response.status_code
-
+            return self.sg.client.teammates._(username).delete()
         except Exception:
             pprint.pprint(traceback.format_exc())
 
     def invite_teammate(self, email, scopes, is_admin=False):
         params = {"email": email, "scopes": scopes, "is_admin": is_admin}
-
         try:
-            response = self.sg.client.teammates.post(request_body=params)
-
-            pprint.pprint(response.status_code)
-            pprint.pprint(response.body)
-            pprint.pprint(response.headers)
-
-            return response
+            return self.sg.client.teammates.post(request_body=params)
         except Exception:
             pprint.pprint(traceback.format_exc())
 
@@ -130,7 +89,6 @@ class SendgridTeammatesManage:
             )
             with open(file_path, "w") as f:
                 json.dump(results, f, indent=4)
-
         except Exception:
             pprint.pprint(traceback.format_exc())
 
@@ -142,7 +100,6 @@ class SendgridTeammatesManage:
             with open(file_path) as f:
                 data = json.load(f)
                 return data
-
         except Exception:
             pprint.pprint(traceback.format_exc())
 
