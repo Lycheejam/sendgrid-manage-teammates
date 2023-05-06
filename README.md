@@ -1,44 +1,37 @@
 # Sendgrid Manage Teammates
 
-Sendgridのチームメート管理を楽にするスクリプト。  
-以下の処理が実行される。
+Sendgridのteammates管理を楽にするスクリプト。  
 
-1. 状態確認
-2. 招待中のチームメートを全削除
-3. 削除対象チームメートを削除
-4. 新規招待対象のチームメートを招待
-5. 状態確認
+## できること
 
-`data/users.json`、`data/roles.json`でチームメートとパーミッションを定義するが、定義したものと一致したかはチェックしていないため実行時に出力されるログで目検チェックする必要がある。
+1. teammateのinviteができる。
+    * invite対象のユーザが既にinvite中だった場合はinviteを削除して再度inviteを行う。
+    * 事前に定義したpermissionのリストをroleとして指定できる。
+2. teammateのdeleteができる。
+3. teammateの状態を出力することができる。
+    * consoleに標準出力される。
+    * invite中のユーザも一緒に出力される。
 
 ## サブユーザの切り替え
 
 `.env`に`env`を定義。もしくはスクリプトを実行する際に`export env=xxx`の様にする。
 
-## users.json
-
-`data/`配下に配置する。  
-サブユーザ単位で変更する場合は`data/<hoge>/`の配下にそれぞれ配置する。
-
-```sh
-[
-    {
-        "email": "example@example.com",
-        "is_admin": "true",
-        "role": "Administrator",
-        "state": "present" # present or absent
-    },
-    {
-        "email": "example+hoge@example.com",
-        "is_admin": "false",
-        "role": "DeveloperReadOnly",
-        "state": "present"
-    }
-]
-
-```
-
 ## roles.json
 
 `data/`配下に配置する。  
 サブユーザ単位で変更する場合は`data/<hoge>/`の配下にそれぞれ配置する。
+
+## 運用イメージ
+
+* 実施タイミング：月次
+    * inviteについては必要があれば随時
+
+1. invite機能を使用して対象のユーザをinviteする。
+2. teammatesの一覧を出力する。
+3. gitにcommitする。
+
+## 運用の例外等
+
+* roleで設定しているpermissionの変更が発生した場合、既存teammatesの権限はWebUIから手動で変更する。
+    * 今回はpermissionの更新機能を含めないため。
+* 実施タイミングを月次としているが更新が発生するタイミングでユーザの一覧を更新する。
