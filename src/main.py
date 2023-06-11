@@ -3,9 +3,11 @@ import traceback
 from sendgrid import SendGridAPIClient
 from dotenv import load_dotenv
 import json
-from models.teammate import Teammate
+from teammate import Teammate
+from roles import Roles
 import pprint
 import argparse
+import sys
 
 load_dotenv()
 
@@ -14,34 +16,40 @@ class SendgridTeammatesManage:
     def __init__(self) -> None:
         self.sg = self.authorize_client()
 
+    def arg_parse(self):
+        try:
+            parser = argparse.ArgumentParser(
+                description="Sendgridのteammatesを管理するスクリプト。"
+            )
+            parser.add_argument(
+                "command",
+                choices=["invite", "delete", "describe"],
+                help="実行する処理を指定してください。",
+            )
+            parser.add_argument(
+                "--email",
+                type="str",
+                nargs="1",
+                default=None,
+                help="inviteまたはdeleteの場合、emailを指定してください。",
+            )
+            parser.add_argument(
+                "--role",
+                type="str",
+                nargs="1",
+                default=None,
+                help="inviteの場合、roleを指定してください。",
+            )
+
+            return parser.parse_args()
+        except Exception:
+            parser.print_help()
+            sys.exit(0)
+
     def main(self) -> None:
-
-        parser = argparse.ArgumentParser(description="Sendgridのteammatesを管理するスクリプト。")
-        parser.add_argument(
-            "command", choices=["invite", "delete", "describe"], help="実行する処理を指定してください。"
-        )
-        parser.add_argument(
-            "--email",
-            type="str",
-            nargs="?",
-            default=None,
-            help="inviteまたはdeleteの場合、emailを指定してください。",
-        )
-        parser.add_argument(
-            "--role",
-            type="str",
-            nargs="?",
-            default=None,
-            help="inviteの場合、roleを指定してください。",
-        )
-
-        args = parser.parse_args()
-
+        args = self.arg_parse()
         if not self.validate_options(args):
             return
-
-        env = os.environ.get("env", "")
-        roles = self.read_json_to_dict("/".join(filter(None, (env, "roles.json"))))
 
         if args.command == "invite":
             # invite保留中のユーザを確認して今回invite対象のユーザと重複していた場合に削除
@@ -50,7 +58,9 @@ class SendgridTeammatesManage:
                 for pending_teammate in pending_teammates:
                     if pending_teammate["email"] == args.email:
                         self.delete_pending_teammate(pending_teammate["pending_token"])
-            self.invite_teammate(args.email, roles[args.role])
+
+            role = Roles().get_role(args.role)
+            self.invite_teammate(args.email, role)
         elif args.command == "delete":
             self.delete_teammate(args.email)
         elif args.command == "describe":
@@ -106,17 +116,6 @@ class SendgridTeammatesManage:
     def delete_teammate(self, username):
         try:
             return self.sg.client.teammates._(username).delete()
-        except Exception:
-            pprint.pprint(traceback.format_exc())
-
-    def read_json_to_dict(self, file_name):
-        try:
-            file_path = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), "../data", file_name
-            )
-            with open(file_path) as f:
-                data = json.load(f)
-                return data
         except Exception:
             pprint.pprint(traceback.format_exc())
 
